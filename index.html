@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Shared Bonsai</title>
+  <meta name="description" content="Grow a shared bonsai tree together with someone you love." />
+  <meta name="theme-color" content="#F3EFE6">
+
+  <!-- iOS PWA -->
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="Bonsai" />
+  <link rel="apple-touch-icon" href="icon.png" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Lora:wght@300;400&family=Inter:wght@400;500&display=swap"
+    rel="stylesheet">
+
+  <link rel="stylesheet" href="style.css">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/png" href="icon.png">
+</head>
+
+<body>
+
+  <div id="app">
+    <!-- Landing / Join Screen -->
+    <div id="join-screen" class="screen">
+      <h1>Shared Bonsai</h1>
+      <p class="subtitle">Grow together, one drop at a time.</p>
+
+      <div class="input-group">
+        <input id="codeInput" placeholder="Enter tree code" maxlength="5" autocomplete="off"
+          autocapitalize="characters" />
+        <button id="joinBtn" class="primary-btn">Join Tree</button>
+      </div>
+
+      <div class="divider">or</div>
+
+      <button id="createBtn" class="secondary-btn">Plant New Seed</button>
+    </div>
+
+    <!-- Main Tree View -->
+    <div id="tree-screen" class="screen hidden">
+      <div class="header-info">
+        <span id="treeCodeDisplay" class="pill">Code: <span id="codeValue">...</span></span>
+        <button id="leaveBtn" class="pill secondary-pill">Leave Tree</button>
+        <span id="healthDisplay" class="pill">Health: <span id="healthValue">100</span>%</span>
+      </div>
+
+      <div class="canvas-container">
+        <canvas id="treeCanvas"></canvas>
+      </div>
+
+      <div id="actions">
+        <button id="trimBtn" class="fab trim-btn" aria-label="Trim">
+          ✂️
+          <span>Trim</span>
+        </button>
+        <button id="growBtn" class="fab grow-btn" aria-label="Water & Grow">
+          💧
+          <span>Water</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Register service worker
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('./sw.js');
+    }
+  </script>
+  <script type="module" src="app.js"></script>
+</body>
+
+</html>
