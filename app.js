@@ -19,50 +19,44 @@ const db = getDatabase(app);
 // All values are proportional (0-1) and will be scaled to actual canvas size at render time.
 // Origin (0.5, 0.85) is the base of trunk (center, near bottom).
 // Positive X = right, Negative Y = up.
-// These define the FIXED structure of the bonsai â€” it never changes.
+// These define the FIXED structure of the bonsai — it never changes.
 function getBonsaiSkeleton() {
-  // The skeleton is a list of branch segments:
-  // { x1, y1, x2, y2, width, cpx, cpy } â€” all proportional (0-1)
-  // cpx/cpy = quadratic bezier control point for natural curves
-  // "tips" are the endpoints of branches that have no children â€” foliage grows there
   return {
     segments: [
-      // Main trunk (S-curve from base, slight lean right then up)
-      { id: 's1', x1: 0.50, y1: 0.85, x2: 0.51, y2: 0.72, cpx: 0.48, cpy: 0.78, width: 14 },
-      { id: 's2', x1: 0.51, y1: 0.72, x2: 0.52, y2: 0.62, cpx: 0.54, cpy: 0.67, width: 11 },
-      { id: 's3', x1: 0.52, y1: 0.62, x2: 0.50, y2: 0.52, cpx: 0.50, cpy: 0.57, width: 9 },
-      { id: 's4', x1: 0.50, y1: 0.52, x2: 0.48, y2: 0.43, cpx: 0.46, cpy: 0.47, width: 7 },
+      // Trunk: Centered more vertically: base at 0.75, top at 0.50
+      // Shorter segments overall for a compact, powerful look
+      { id: 's1', x1: 0.50, y1: 0.75, x2: 0.51, y2: 0.68, cpx: 0.46, cpy: 0.72, width: 38 },
+      { id: 's2', x1: 0.51, y1: 0.68, x2: 0.53, y2: 0.62, cpx: 0.56, cpy: 0.65, width: 28 },
+      { id: 's3', x1: 0.53, y1: 0.62, x2: 0.49, y2: 0.56, cpx: 0.52, cpy: 0.59, width: 18 },
+      { id: 's4', x1: 0.49, y1: 0.56, x2: 0.48, y2: 0.51, cpx: 0.46, cpy: 0.53, width: 10 },
 
-      // Left primary branch (low, horizontal, then slightly down â€” typical bonsai)
-      { id: 'l1', x1: 0.51, y1: 0.72, x2: 0.32, y2: 0.70, cpx: 0.42, cpy: 0.68, width: 7 },
-      { id: 'l2', x1: 0.32, y1: 0.70, x2: 0.22, y2: 0.73, cpx: 0.27, cpy: 0.69, width: 5 },
-      { id: 'l3', x1: 0.22, y1: 0.73, x2: 0.15, y2: 0.70, cpx: 0.18, cpy: 0.72, width: 3 },
+      // Branches (Tightened horizontal spread, more compact)
+      { id: 'l1a', x1: 0.51, y1: 0.68, x2: 0.42, y2: 0.67, cpx: 0.46, cpy: 0.66, width: 10 },
+      { id: 'l1b', x1: 0.42, y1: 0.67, x2: 0.30, y2: 0.70, cpx: 0.35, cpy: 0.67, width: 6 },
+      { id: 'l1c', x1: 0.30, y1: 0.70, x2: 0.22, y2: 0.69, cpx: 0.26, cpy: 0.70, width: 4 },
 
-      // Right primary branch (slightly above left)
-      { id: 'r1', x1: 0.52, y1: 0.62, x2: 0.68, y2: 0.60, cpx: 0.60, cpy: 0.59, width: 6 },
-      { id: 'r2', x1: 0.68, y1: 0.60, x2: 0.78, y2: 0.63, cpx: 0.73, cpy: 0.59, width: 4 },
-      { id: 'r3', x1: 0.78, y1: 0.63, x2: 0.84, y2: 0.61, cpx: 0.81, cpy: 0.61, width: 2.5 },
+      { id: 'r1a', x1: 0.53, y1: 0.62, x2: 0.65, y2: 0.61, cpx: 0.59, cpy: 0.60, width: 9 },
+      { id: 'r1b', x1: 0.65, y1: 0.61, x2: 0.75, y2: 0.64, cpx: 0.70, cpy: 0.61, width: 5 },
+      { id: 'r1c', x1: 0.75, y1: 0.64, x2: 0.82, y2: 0.62, cpx: 0.78, cpy: 0.63, width: 3.5 },
 
-      // Left upper branch
-      { id: 'lu1', x1: 0.50, y1: 0.52, x2: 0.36, y2: 0.48, cpx: 0.43, cpy: 0.48, width: 5 },
-      { id: 'lu2', x1: 0.36, y1: 0.48, x2: 0.27, y2: 0.46, cpx: 0.31, cpy: 0.46, width: 3 },
+      { id: 'l2a', x1: 0.49, y1: 0.56, x2: 0.40, y2: 0.54, cpx: 0.44, cpy: 0.54, width: 7 },
+      { id: 'l2b', x1: 0.40, y1: 0.54, x2: 0.32, y2: 0.55, cpx: 0.36, cpy: 0.54, width: 4 },
 
-      // Right upper branch
-      { id: 'ru1', x1: 0.48, y1: 0.43, x2: 0.60, y2: 0.38, cpx: 0.54, cpy: 0.39, width: 4 },
-      { id: 'ru2', x1: 0.60, y1: 0.38, x2: 0.68, y2: 0.35, cpx: 0.64, cpy: 0.36, width: 2.5 },
+      { id: 'r2a', x1: 0.49, y1: 0.56, x2: 0.60, y2: 0.53, cpx: 0.54, cpy: 0.55, width: 7 },
+      { id: 'r2b', x1: 0.60, y1: 0.53, x2: 0.70, y2: 0.51, cpx: 0.65, cpy: 0.52, width: 4 },
 
-      // Apex â€” top center (slightly left-leaning, typical bonsai apex)
-      { id: 'ap', x1: 0.50, y1: 0.43, x2: 0.49, y2: 0.33, cpx: 0.47, cpy: 0.38, width: 3 },
+      { id: 'u1', x1: 0.48, y1: 0.51, x2: 0.55, y2: 0.48, cpx: 0.52, cpy: 0.49, width: 5 },
+      { id: 'u2', x1: 0.48, y1: 0.51, x2: 0.41, y2: 0.47, cpx: 0.44, cpy: 0.49, width: 5 },
+      { id: 'u3', x1: 0.48, y1: 0.51, x2: 0.49, y2: 0.45, cpx: 0.48, cpy: 0.48, width: 4.5 },
     ],
-    // Foliage tip positions (proportional).
-    // dx/dy bias is now mostly horizontal (bonsai foliage spreads wide).
-    // vertBias: small random vertical offset per tip baked into rendering seed
     tips: [
-      { x: 0.15, y: 0.70, dx: -1, dy: 0, vertBias: 0.1, id: 'l3' },  // Far left
-      { x: 0.27, y: 0.46, dx: -0.8, dy: 0, vertBias: -0.1, id: 'lu2' },  // Upper left
-      { x: 0.84, y: 0.61, dx: 1, dy: 0, vertBias: 0.15, id: 'r3' },  // Far right
-      { x: 0.68, y: 0.35, dx: 0.7, dy: 0, vertBias: -0.15, id: 'ru2' },  // Upper right
-      { x: 0.49, y: 0.33, dx: 0, dy: -0.4, vertBias: -0.2, id: 'ap' },  // Apex (slightly up)
+      { x: 0.22, y: 0.69, dx: -1, dy: 0.1, id: 'l1c' }, // Lower left
+      { x: 0.82, y: 0.62, dx: 1, dy: 0.1, id: 'r1c' }, // Lower right
+      { x: 0.32, y: 0.55, dx: -0.8, dy: 0, id: 'l2b' }, // Mid left
+      { x: 0.70, y: 0.51, dx: 0.8, dy: 0, id: 'r2b' }, // Mid right
+      { x: 0.55, y: 0.48, dx: 0.6, dy: -0.3, id: 'u1' }, // Upper left
+      { x: 0.41, y: 0.47, dx: -0.6, dy: -0.3, id: 'u2' }, // Upper right
+      { x: 0.49, y: 0.45, dx: 0.1, dy: -1, id: 'u3' }, // Apex
     ]
   };
 }
@@ -105,8 +99,16 @@ class SharedBonsai {
 
   resizeCanvas() {
     if (!this.canvas) return;
-    this.canvas.width = window.innerWidth;
-    this.canvas.height = window.innerHeight * 0.65;
+    const container = this.canvas.parentElement;
+    // Use container dimensions only if they have been computed (> 0).
+    // At constructor time the flex layout hasn't painted yet, so clientHeight
+    // is 0 → canvas height would be 0 → nothing renders. Fall back to window.
+    const w = (container && container.clientWidth > 0)
+      ? container.clientWidth : window.innerWidth;
+    const h = (container && container.clientHeight > 50)
+      ? container.clientHeight : window.innerHeight * 0.62;
+    this.canvas.width = w;
+    this.canvas.height = h;
   }
 
   bindEvents() {
@@ -165,7 +167,7 @@ class SharedBonsai {
         }
         // Detect remote watering: if age went up and we didn't cause it
         if (this.lastKnownAge !== null && data.age > this.lastKnownAge && !this._justWatered) {
-          this.showToast('🌿 Your bonsai was just watered!');
+          this.showToast('Your bonsai was just watered!');
         }
         this._justWatered = false;
         this.lastKnownAge = data.age;
@@ -173,6 +175,15 @@ class SharedBonsai {
         this.currentTree = data;
         this.updateUI(data);
         this.renderTree(data);
+        // Re-measure after first paint: flex container may have had 0 height
+        // at constructor time. rAF fires after layout, giving correct dimensions.
+        if (!this._initialResizeDone) {
+          this._initialResizeDone = true;
+          requestAnimationFrame(() => {
+            this.resizeCanvas();
+            this.renderTree(data);
+          });
+        }
       } else {
         alert("Tree not found!");
         this.leaveTree();
@@ -301,12 +312,12 @@ class SharedBonsai {
     const px = (xp) => xp * W;
     const py = (yp) => yp * H;
 
-    // 1. Draw pot
-    this.drawPot(W / 2, H * 0.88);
+
+
+
+
 
     // 2. Draw trunk and branches — two passes for texture:
-    //    Pass 1: dark base stroke (bark shadow)
-    //    Pass 2: thinner lighter stroke offset slightly (bark highlight)
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
     for (const seg of this.skeleton.segments) {
@@ -329,65 +340,119 @@ class SharedBonsai {
       ctx.stroke();
     }
 
+    // 2.5 Draw Pot, Moss & Roots ON TOP of trunk base (as requested)
+    this.drawPot(W / 2, H * 0.82);
+    this.drawMoss(px(0.50), py(0.75), W * 0.12); // base y=0.75
+    this.drawRoots(px(0.50), py(0.75), W * 0.13);
+    
+
     // 3. Draw foliage per tip with its own density
     this.skeleton.tips.forEach((tip, i) => {
       const density = tipDensities[i] || 1;
-      this.drawFoliageCluster(px(tip.x), py(tip.y), tip.dx, tip.dy, tip.vertBias, density, W, H);
+      this.drawFoliageCluster(px(tip.x), py(tip.y), tip.dx, tip.dy, density, W, H);
     });
   }
 
-  drawFoliageCluster(cx, cy, spreadDx, spreadDy, vertBias, density, canvasW, canvasH) {
+  drawFoliageCluster(cx, cy, spreadDx, spreadDy, density, canvasW, canvasH) {
     const ctx = this.ctx;
     ctx.save();
 
-    // Foliage grows as horizontal ellipses — wide, flat, like real bonsai pads.
-    // Max horizontal radius capped as fraction of canvas
-    const maxRx = canvasW * 0.20;
-    const baseRx = Math.min(15 + density * 2.5, maxRx); // horizontal radius
-    const baseRy = baseRx * 0.45; // much flatter — ellipse shape
+    // Height-dependent scaling: lower pads (higher screen Y) can grow larger.
+    // Normalized y offset: 0.0 at top most tip (0.45) to 1.0 at lowest tip (0.75)
+    const normY = (cy / canvasH - 0.45) / 0.30;
+    const yMultiplier = 1.0 + Math.max(0, normY * 0.9); // Up to 90% larger for low pads
 
-    // Number of pads grows with density
-    const numPads = Math.min(2 + Math.floor(density / 3), 9);
+    // Cloud-pad style: denser, more compact layered clusters of leaflets.
+    const maxPadR = Math.min(canvasW * 0.14, canvasH * 0.16) * yMultiplier;
+    const padR = Math.min(18 + density * 2.1, maxPadR);
+    const numLeaflets = Math.min(15 + Math.floor(density * 1.8), 45) * (0.8 + normY * 0.5);
 
-    // Color palette — researched bonsai tones: rich moss, sage, ivy, teak
-    const colors = [
-      'rgba(70, 103, 77, 0.92)',   // Bush Green #46674D
-      'rgba(90, 130, 60, 0.87)',   // mid moss
-      'rgba(58, 88, 48, 0.82)',    // dark ivy
-      'rgba(122, 155, 98, 0.78)',  // Ivy light #7A9B62
-    ];
+    // Darkened Palette from reference:
+    const colorBottom = '#132812'; // deeper shadow
+    const colorMid = '#224D17'; // mid green
+    const colorTop = '#3A6B35'; // olive/fern
+    const colorHigh = '#6B8E23'; // olivine highlight (darker than before)
 
-    for (let i = numPads - 1; i >= 0; i--) {
-      // t=0 is center/first pad, t=1 is outermost
-      const t = numPads > 1 ? i / (numPads - 1) : 0;
+    const rx = padR;
+    const ry = padR * 0.40;
 
-      // Primary spread: in branch direction (mostly horizontal)
-      const spreadMag = baseRx * 0.65 * t;
-      const ox = spreadDx * spreadMag;
+    // First Pass: Shady base
+    for (let i = 0; i < numLeaflets; i++) {
+      const angle = i * 2.39996;
+      const dist = Math.sqrt(i / numLeaflets);
+      const lx = cx + spreadDx * padR * 0.15 + Math.cos(angle) * dist * rx;
+      const ly = cy + spreadDy * padR * 0.15 + Math.sin(angle) * dist * ry;
 
-      // Vertical randomness: each pad drifts a bit up or down based on vertBias + per-pad seed
-      // Using a deterministic seed (based on i + cx) so cloud positions are stable across re-renders
-      const seed = Math.sin(i * 73.1 + cx * 0.01);
-      const oy = spreadDy * spreadMag + vertBias * baseRy * 2 * t + seed * baseRy * 0.5;
-
-      // Pads get slightly smaller toward tips
-      const rx = baseRx * (0.8 + 0.2 * (1 - t));
-      const ry = baseRy * (0.8 + 0.2 * (1 - t));
-
-      // Clamp to stay inside canvas
-      const padCx = Math.max(rx, Math.min(canvasW - rx, cx + ox));
-      const padCy = Math.max(ry, Math.min(canvasH * 0.82 - ry, cy + oy));
-
-      ctx.fillStyle = colors[i % colors.length];
+      ctx.fillStyle = i < numLeaflets * 0.5 ? colorBottom : colorMid;
       ctx.beginPath();
-      ctx.ellipse(padCx, padCy, rx, ry, 0, 0, Math.PI * 2);
-
-      // Small lobes at edges for cloud-like shape
-      ctx.ellipse(padCx + rx * 0.5, padCy - ry * 0.4, rx * 0.45, ry * 0.7, 0, 0, Math.PI * 2);
-      ctx.ellipse(padCx - rx * 0.5, padCy - ry * 0.3, rx * 0.4, ry * 0.65, 0, 0, Math.PI * 2);
+      ctx.ellipse(lx, ly, rx * 0.25, ry * 0.35, angle, 0, Math.PI * 2);
       ctx.fill();
     }
 
+    // Second Pass: Layered highlight (Top)
+    const numHighlights = Math.floor(numLeaflets * 0.65);
+    for (let i = 0; i < numHighlights; i++) {
+      const angle = i * 2.39996 + 0.8;
+      const dist = Math.sqrt(i / numHighlights) * 0.7;
+      const lx = cx + spreadDx * padR * 0.15 + Math.cos(angle) * dist * rx;
+      const ly = cy + spreadDy * padR * 0.15 + Math.sin(angle) * dist * ry - (ry * 0.2);
+
+      ctx.fillStyle = i < numHighlights * 0.5 ? colorTop : colorHigh;
+      ctx.beginPath();
+      ctx.ellipse(lx, ly, rx * 0.2, ry * 0.3, angle, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    ctx.restore();
+  }
+
+  drawRoots(cx, cy, width) {
+    const ctx = this.ctx;
+    ctx.save();
+    ctx.strokeStyle = '#2B1A0E'; // Darker root color
+    ctx.lineCap = 'round';
+
+    // Seeded randomness for stable roots
+    const numRoots = 6;
+    for (let i = 0; i < numRoots; i++) {
+      const angleSeed = Math.sin(i * 12.3 + cx * 0.1) * 0.5 + 0.5;
+      const angle = Math.PI - (i * (Math.PI / (numRoots - 1))) + (angleSeed - 0.5) * 0.3;
+      const lengthSeed = Math.cos(i * 45.7 + cy * 0.2) * 0.5 + 0.5;
+      const length = width * (0.6 + lengthSeed * 0.5);
+
+      ctx.beginPath();
+      ctx.lineWidth = 8 * (1 - (i / numRoots) * 0.5);
+      ctx.moveTo(cx, cy);
+      const ex = cx + Math.cos(angle) * length;
+      const ey = cy + Math.sin(angle) * length * 0.3;
+      ctx.quadraticCurveTo(cx + Math.cos(angle) * length * 0.5, cy + 12, ex, ey);
+      ctx.stroke();
+    }
+    ctx.restore();
+  }
+
+  drawMoss(cx, cy, width) {
+    const ctx = this.ctx;
+    ctx.save();
+
+    // Seeded randomness for stable moss
+    const numBumps = 30;
+    const mossColors = ['#1B3C1A', '#2D5A27', '#224D17'];
+
+    for (let i = 0; i < numBumps; i++) {
+      const seedX = Math.sin(i * 7.8 + cx * 0.05) * 0.5 + 0.5;
+      const seedY = Math.cos(i * 3.2 + cy * 0.1) * 0.5 + 0.5;
+
+      const rx = width * (0.4 + seedX * 0.8);
+      const ry = width * 0.18;
+      const ox = (seedX - 0.5) * width * 1.5;
+      const oy = (seedY - 0.5) * width * 0.3;
+
+      ctx.fillStyle = mossColors[i % 3];
+      ctx.beginPath();
+      ctx.ellipse(cx + ox, cy + oy, rx * 0.22, rx * 0.12, 0, 0, Math.PI * 2);
+      ctx.fill();
+    }
     ctx.restore();
   }
 
@@ -409,7 +474,7 @@ class SharedBonsai {
     ctx.ellipse(cx, baseY + 4, potW * 0.55, 6, 0, 0, Math.PI * 2);
     ctx.fill();
 
-    // Pot body â€” trapezoidal (wider at top, narrower at bottom)
+    // Pot body trapezoidal (wider at top, narrower at bottom)
     const top = baseY - potH - rimH;
     const bot = baseY - footH;
     ctx.fillStyle = '#8B4513';
