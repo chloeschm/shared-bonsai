@@ -100,15 +100,17 @@ class SharedBonsai {
   resizeCanvas() {
     if (!this.canvas) return;
     const container = this.canvas.parentElement;
-    // Use container dimensions only if they have been computed (> 0).
-    // At constructor time the flex layout hasn't painted yet, so clientHeight
-    // is 0 → canvas height would be 0 → nothing renders. Fall back to window.
-    const w = (container && container.clientWidth > 0)
-      ? container.clientWidth : window.innerWidth;
-    const h = (container && container.clientHeight > 50)
-      ? container.clientHeight : window.innerHeight * 0.62;
-    this.canvas.width = w;
-    this.canvas.height = h;
+    if (!container) return;
+
+    const w = container.clientWidth;
+    const h = container.clientHeight;
+
+    // Only update and re-render if dimensions actually changed
+    if (this.canvas.width !== w || this.canvas.height !== h) {
+      this.canvas.width = w;
+      this.canvas.height = h;
+      if (this.currentTree) this.renderTree(this.currentTree);
+    }
   }
 
   bindEvents() {
@@ -174,15 +176,17 @@ class SharedBonsai {
 
         this.currentTree = data;
         this.updateUI(data);
-        this.renderTree(data);
-        // Re-measure after first paint: flex container may have had 0 height
-        // at constructor time. rAF fires after layout, giving correct dimensions.
+
+        // Ensure we have correct dimensions before the very first render
         if (!this._initialResizeDone) {
           this._initialResizeDone = true;
+          // Use a small timeout or rAF to wait for flexbox to settle
           requestAnimationFrame(() => {
             this.resizeCanvas();
             this.renderTree(data);
           });
+        } else {
+          this.renderTree(data);
         }
       } else {
         alert("Tree not found!");
@@ -344,7 +348,7 @@ class SharedBonsai {
     this.drawPot(W / 2, H * 0.82);
     this.drawMoss(px(0.50), py(0.75), W * 0.12); // base y=0.75
     this.drawRoots(px(0.50), py(0.75), W * 0.13);
-    
+
 
     // 3. Draw foliage per tip with its own density
     this.skeleton.tips.forEach((tip, i) => {

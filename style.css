@@ -22,7 +22,8 @@ body {
   min-height: 100vh;
   min-height: 100dvh;
   /* dynamic viewport height — accounts for browser chrome */
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: auto;
   user-select: none;
   -webkit-user-select: none;
 }
@@ -51,8 +52,10 @@ body {
 
 /* Tree screen overrides: row layout top→canvas→buttons */
 #tree-screen {
+  position: relative;
   justify-content: flex-start;
-  padding-bottom: env(safe-area-inset-bottom, 16px);
+  padding: 0;
+  overflow: hidden;
 }
 
 .hidden {
@@ -125,12 +128,15 @@ button:active {
 
 /* Tree Screen */
 .header-info {
+  position: absolute;
+  top: env(safe-area-inset-top, 0);
+  left: 0;
   width: 100%;
   display: flex;
   justify-content: space-between;
   padding: 14px 20px;
   box-sizing: border-box;
-  z-index: 10;
+  z-index: 20;
   flex-shrink: 0;
 }
 
@@ -143,12 +149,13 @@ button:active {
 }
 
 .canvas-container {
-  flex: 1 1 0;
-  /* take all remaining space */
+  height: 100vh;
+  height: 100dvh;
   width: 100%;
-  min-height: 0;
-  /* important: allows flex child to shrink */
-  position: relative;
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1;
   overflow: hidden;
 }
 
@@ -160,14 +167,17 @@ canvas {
 
 #actions {
   position: absolute;
-  top: 20px;            
-  left: 50%;
-  transform: translateX(-50%);
+  top: calc(env(safe-area-inset-top, 0px) + 65px);
+  left: 0;
   display: flex;
-  gap: 40px;
+  gap: 30px;
+  justify-content: center;
+  padding: 10px 0;
+  flex-shrink: 0;
   z-index: 20;
-  pointer-events: auto;
+  width: 100%;
 }
+
 .fab {
   width: 70px;
   height: 70px;

@@ -1,5 +1,5 @@
 // Bump this version string any time you deploy a change — it busts the cache.
-const CACHE_VERSION = 'shared-bonsai-v3';
+const CACHE_VERSION = 'shared-bonsai-v5';
 const ASSETS = [
     './',
     './index.html',
@@ -30,9 +30,10 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
     const url = new URL(event.request.url);
 
-    // Always go network-first for the Firebase CDN and app.js so updates propagate
+    // Always go network-first for the Firebase CDN, app.js, index.html, and style.css so updates propagate
     const networkFirst = url.hostname.includes('firebase') ||
         url.pathname.endsWith('app.js') ||
+        url.pathname.endsWith('style.css') ||
         url.pathname.endsWith('index.html');
 
     if (networkFirst) {
