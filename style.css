@@ -159,15 +159,15 @@ canvas {
 }
 
 #actions {
+  position: absolute;
+  top: 20px;            
+  left: 50%;
+  transform: translateX(-50%);
   display: flex;
   gap: 40px;
-  justify-content: center;
-  padding: 16px 0 max(16px, env(safe-area-inset-bottom));
-  flex-shrink: 0;
-  z-index: 10;
-  width: 100%;
+  z-index: 20;
+  pointer-events: auto;
 }
-
 .fab {
   width: 70px;
   height: 70px;
